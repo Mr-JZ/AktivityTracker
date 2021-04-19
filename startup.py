@@ -1,12 +1,16 @@
 import os
 
+import winshell
+
 
 class startup():
     def __init__(self):
         self.startupdirectory()
 
     def startupdirectory(self):
-        return os.path.join(os.getenv("appdata"),"Microsoft","Windows","Start Menu","Programs","Startup")
+        return winshell.startup()
 
 if __name__ == "__main__":
     print(startup())
+    with open(os.path.join(winshell.startup(), 'test.py'), 'w') as file:
+        file.write('import test ')
