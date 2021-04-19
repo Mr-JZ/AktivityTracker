@@ -1,5 +1,6 @@
 import json
 
+
 class Data():
     def __init__(self):
         self.no_data = False
@@ -27,7 +28,9 @@ class Data():
         data = {
             'browser_time': 0,
             'topics': ['unproductive', 'productive'],
-            'use_since_install': 0
+            'use_since_install': 0,
+            'programs': ["Word", "PowerPoint", "Excel", "Notion", "Chrome", "Edge", "Firefox", "Terminal", "Zoom",
+                         "Discord", "Teams", "Spotify"]
         }
         return data
 
@@ -40,17 +43,29 @@ class Data():
     def get_topics(self):
         return self.data['topics']
 
-    def add_topics(self, topic):
-        self.data['topics'].append(topic)
+    def get_programs(self):
+        return self.data['programs']
+
+    def add_topic(self, topic):
+        self.addListItem(self.data['topics'], topic)
         self.save_file()
 
     def set_browserTime(self, time):
-        self.data['browser_time']= time
+        self.data['browser_time'] = time
         self.save_file()
 
     def set_useSinceInstall(self, time):
         self.data['use_since_install'] = time
         self.save_file()
 
+    def add_program(self, program):
+        self.addListItem(self.data['programs'], program)
+        self.save_file()
+
+    def addListItem(self, list, item):
+        for i in list:
+            if i == item:
+                return
+        list.append(item)
 if __name__ == '__main__':
-    print(Data().set_browserTime(0))
+    print(Data().get_browserTime())

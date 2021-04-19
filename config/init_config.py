@@ -7,7 +7,7 @@ config['basic'] ={
     'productive' : '100'
 }
 config['files'] = {
-    'location' : ''
+    'location' : '',
 }
 
 with open('./config.ini', 'w') as f:

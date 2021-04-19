@@ -41,4 +41,4 @@ class Config:
             self.parser.write(c)
 
 if __name__ == '__main__':
-    print(Config().set_productive(20))
+    print(Config().get_startup())
