@@ -1,7 +1,9 @@
 import pygetwindow as gw
-import time
+import datetime
 import threading
+import time
 from tab_filter import FilterTab
+from data.main_csv import MainCSV
 
 
 def possible_windows():
@@ -16,7 +18,7 @@ def possible_windows():
 # locks in the list if there is a window with the same name
 def window_in_list(window_dic, window):
     for tmp in window_dic:
-        if tmp == FilterTab().filter(window.title):
+        if tmp[0].title == FilterTab().filter(window.title):
             return True
     return False
 
@@ -24,6 +26,7 @@ def window_in_list(window_dic, window):
 # This is for the left upper corner sometime there not spot on of each other so you could make the tolerance bigger
 def check_corner_tolerant(window_1, window_2):
     tolerant = 10
+    # TODO Check if the window is over the other window with bottomright corner. If the window is smaller or bigger then the other return tru
     if window_1.box.left + tolerant >= window_2.box.left >= window_1.box.left - tolerant and window_1.box.top + tolerant >= window_2.box.top >= window_1.box.top - tolerant:
         return True
     return False
@@ -54,17 +57,22 @@ class VisibleWindow:
     def visible_windows(self):
         active_windows = gw.getActiveWindow()
         # print('Aktiv window: '+ active_windows.title)
-        for window in self.list_visible_windows:
-            # print('A Window: ' + window.title)
-            print(window)
-            if window_overlay(active_windows, self.list_visible_windows[window]):
-                self.list_visible_windows.pop(window)
-                self.list_visible_windows[FilterTab().filter(active_windows.title)] = active_windows
-                return
         if window_in_list(self.list_visible_windows, active_windows):
             return
+        for window in self.list_visible_windows:
+            # print('A Window: ' + window.title)
+            # print(window)
 
-        self.list_visible_windows[FilterTab().filter(active_windows.title)] = active_windows
+            # we use the parameter active window and the dictionary with the window object
+            if window_overlay(active_windows, self.list_visible_windows[window][0]):
+                # TODO add the file to the .csv
+                current_time = datetime.datetime.now()
+                duration = current_time - self.list_visible_windows[window][1]
+                MainCSV().add_time(window, duration.seconds)
+                self.list_visible_windows.pop(window)
+                break
+
+        self.list_visible_windows[FilterTab().filter(active_windows.title)] = (active_windows, datetime.datetime.now())
 
 
 def threading_():
