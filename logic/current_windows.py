@@ -22,24 +22,47 @@ def window_in_list(window_dic, window):
             return True
     return False
 
-
-# This is for the left upper corner sometime there not spot on of each other so you could make the tolerance bigger
-def check_corner_tolerant(window_1, window_2):
-    tolerant = 10
-    # TODO Check if the window is over the other window with bottomright corner. If the window is smaller or bigger then the other return tru
-    if window_1.box.left + tolerant >= window_2.box.left >= window_1.box.left - tolerant and window_1.box.top + tolerant >= window_2.box.top >= window_1.box.top - tolerant:
+def check_point_in_window(x, y , window):
+    if window.box.top <= y <= window.box.bottom and window.box.left <= x <= window.box.right:
         return True
     return False
 
-
 # Checks if the windows have overlay. Is the window smaller than the
 # the first window should be the expected bigger or equal one to get true
-def window_overlay(window_1, window_2):
-    if window_1.title == '' or window_2.title == '':
+def window_overlay(activ_window, compare_window):
+    window_to_small_percentage = 0.2
+    window_cover_percentage = 0.4
+
+    if activ_window.title == '' or compare_window.title == '':
         return False
-    if check_corner_tolerant(window_1,
-                             window_2) and window_1.box.width <= window_2.box.width and window_1.box.height <= window_2.box.height:
+
+    # Check if the active window is in the compared one and big enough
+    if (activ_window.left >= compare_window.left and activ_window.top >= compare_window.top and
+        activ_window.bottom <= compare_window.bottom and activ_window.right <= compare_window.right):
+        activ_window_area = activ_window.width * activ_window.height
+        compare_window_area = compare_window.width * compare_window.height
+        # Checked if the area is very small so you can still see the window behind good
+        if activ_window_area/compare_window_area > window_to_small_percentage:
+            return True
+
+    # Check if active window is bigger as the compared one
+    if (compare_window.left >= activ_window.left and compare_window.top >= activ_window.top and
+            compare_window.bottom <= activ_window.bottom and compare_window.right <= activ_window.right):
         return True
+
+    # overlay in a certain percentage
+    # left_top corner
+    if check_point_in_window(activ_window.left, activ_window.top, compare_window):
+        None
+    # left_bottom corner
+    if check_point_in_window(activ_window.left, activ_window.bottom, compare_window):
+        None
+    # right_top corner
+    if check_point_in_window(activ_window.right, activ_window.top, compare_window):
+        None
+    # right_bottom corner
+    if check_point_in_window(activ_window.right, activ_window.bottom, compare_window):
+        None
     return False
 
 
