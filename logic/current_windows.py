@@ -8,8 +8,8 @@ from data.main_csv import MainCSV
 
 def possible_windows():
     tmp = []
-    all_winows = gw.getAllWindows()
-    for window in all_winows:
+    all_windows = gw.getAllWindows()
+    for window in all_windows:
         if not window.isMinimized:
             tmp.append(window)
     return tmp
@@ -18,13 +18,13 @@ def possible_windows():
 # locks in the list if there is a window with the same name
 def window_in_list(window_dic, window):
     for tmp in window_dic:
-        if tmp[0].title == FilterTab().filter(window.title):
+        if tmp == window._hWnd:
             return True
     return False
 
 
 def check_point_in_window(x, y, window):
-    if window.box.top <= y <= window.box.bottom and window.box.left <= x <= window.box.right:
+    if window.top <= y <= window.bottom and window.left <= x <= window.right:
         return True
     return False
 
@@ -43,7 +43,7 @@ def window_overlay(active_window, compare_window):
     window_to_small_percentage = 0.2
     window_cover_percentage = 0.4
 
-    if active_window.title == '' or compare_window.title == '':
+    if active_window._hWnd == '' or compare_window._hWnd == '':
         return False
 
     # Check if the active window is in the compared one and big enough
@@ -71,7 +71,7 @@ def window_overlay(active_window, compare_window):
             y_bottom = active_window.bottom
         elif active_window.right < compare_window.right:
             x_right = active_window.right
-        calculate_area_of_overlapping_window(x_left, y_top,x_right, y_bottom, compare_window)
+        calculate_area_of_overlapping_window(x_left, y_top, x_right, y_bottom, compare_window)
     # left_bottom corner
     elif check_point_in_window(active_window.left, active_window.bottom, compare_window):
         x_left = active_window.left
@@ -116,28 +116,40 @@ class VisibleWindow:
     def start_algorithm(self):
         while True:
             self.visible_windows()
-            time.sleep(1)
-            print(self.list_visible_windows)
+            time.sleep(2)
+            print(self.readable_name())
 
     def visible_windows(self):
+        # print('activated')
         active_windows = gw.getActiveWindow()
-        # print('Aktiv window: '+ active_windows.title)
+        # print('Aktiv window: '+ active_windows._hWnd
         if window_in_list(self.list_visible_windows, active_windows):
-            return
+            old_active_window_name = active_windows._hWnd
+            old_active_window = self.list_visible_windows[old_active_window_name][0]
+            if old_active_window.box != active_windows.box:
+                print('update geometry')
+                self.list_visible_windows[old_active_window_name][0] = active_windows
         for window in self.list_visible_windows:
-            # print('A Window: ' + window.title)
+            # print('A Window: ' + window._hWnd
             # print(window)
-
+            # print('look through the windows')
             # we use the parameter active window and the dictionary with the window object
             if window_overlay(active_windows, self.list_visible_windows[window][0]):
                 current_time = datetime.datetime.now()
                 duration = current_time - self.list_visible_windows[window][1]
-                MainCSV().add_time(window, duration.seconds)
+                MainCSV().add_time(FilterTab().filter(self.list_visible_windows[window][0].title), duration.seconds)
                 self.list_visible_windows.pop(window)
                 break
-        if not FilterTab().filter(active_windows.title) in self.list_visible_windows:
-            self.list_visible_windows[FilterTab().filter(active_windows.title)] = (active_windows, datetime.datetime.now())
-        # TODO check the location of the window if the location is new update it
+        if not (active_windows._hWnd in self.list_visible_windows):
+            self.list_visible_windows[active_windows._hWnd] = (
+                active_windows, datetime.datetime.now())
+
+    def readable_name(self):
+        tmp_dic = {}
+        for tmp in self.list_visible_windows:
+            tmp_dic[self.list_visible_windows[tmp][0].title] = self.list_visible_windows[tmp][0].box
+        return tmp_dic
+
 
 def threading_():
     x = threading.Thread(target=VisibleWindow, daemon=True)
@@ -150,5 +162,5 @@ if __name__ == "__main__":
     # all_window = gw.getAllWindows()
     # for i in range(len(all_window) - 1):
     #   if window_overlay(all_window[i], all_window[i + 1]):
-    #      print('Windows: ' + all_window[i].title + ' and ' + all_window[i + 1].title)
+    #      print('Windows: ' + all_window[i]._hWnd+ ' and ' + all_window[i + 1]._hWnd
     #     print(window_overlay(all_window[i], all_window[i + 1]))

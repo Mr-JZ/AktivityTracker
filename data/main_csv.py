@@ -19,15 +19,15 @@ class MainCSV:
         self.data = pd.DataFrame(data)
         self.save_data()
 
-    def add_time(self, window, duration):
+    def add_time(self, window_name, duration):
         try:
-            is_null_list = self.data[self.data[window].isnull()].index.tolist()
+            is_null_list = self.data[self.data[window_name].isnull()].index.tolist()
         except KeyError:
             is_null_list = [0]
         try:
-            self.data.loc[is_null_list[0], window] = duration
+            self.data.loc[is_null_list[0], window_name] = duration
         except IndexError:
-            self.data.loc[self.data.size - 1, window] = duration
+            self.data.loc[self.data.size - 1, window_name] = duration
         self.save_data()
 
     def save_data(self):
